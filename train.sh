@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -x
+
+export TOKENIZERS_PARALLELISM=false
+export TORCH_NCCL_AVOID_RECORD_STREAMS=1
+
+NNODES=${NNODES:=1}
+NPROC_PER_NODE=${NPROC_PER_NODE:=$(nvidia-smi --list-gpus | wc -l)}
+MASTER_ADDR=${MASTER_ADDR:=0.0.0.0}
+MASTER_PORT=${MASTER_PORT:=12345}
+
+if [[ "$NNODES" == "1" ]]; then
+  additional_args="$additional_args --standalone"
+else
+  additional_args="--rdzv_endpoint=${MASTER_ADDR}:${MASTER_PORT}"
+fi
+
+torchrun \
+  --nnodes=$NNODES \
+  --nproc-per-node=$NPROC_PER_NODE \
+  $additional_args $@ 2>&1 | tee log.txt
+
+  # --node-rank=$NODE_RANK \
+
+# CUDA_VISIBLE_DEVICES=0 torchrun $additional_args $@ 2>&1 | tee log.txt

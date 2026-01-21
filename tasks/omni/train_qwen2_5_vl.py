@@ -95,7 +95,7 @@ def process_sample(
         #     images.append(Image.open(os.path.join(image_folder, image)).convert("RGB"))
 
         image_resolution = sample["image_resolution"]
-        images = [Image.new("RGB", (image_resolution[0], image_resolution[1]), color=(0, 0, 0))]  # 黑色
+        images = [Image.new("RGB", (image_resolution[0], image_resolution[1]), color=(0, 0, 0))] * len(sample["image"])  # 黑色
 
         image_inputs = processor.image_processor(images=images, return_tensors="pt")
         image_grid_thw = image_inputs["image_grid_thw"]
@@ -104,9 +104,10 @@ def process_sample(
         token_num_inputs["image"] = image_token_num
 
     if "image_bin" in sample:
-        # print(sample["image_bin"])
-        image_embeds = torch.load(sample["image_bin"], map_location="cpu").unsqueeze(dim=0)
-        # print(f"image_embeds, {image_embeds.shape}")
+        image_embeds = []
+        for bin_path in sample["image_bin"]:
+            image_embeds.append(torch.load(bin_path, map_location="cpu"))
+        image_embeds = torch.stack(image_embeds, dim=0)
     else:
         image_embeds = None
         

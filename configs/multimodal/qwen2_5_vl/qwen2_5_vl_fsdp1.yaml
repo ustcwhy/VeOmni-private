@@ -6,7 +6,7 @@ data:
   datasets_type: iterable
   train_path: sharegpt4v_sft
   chat_template: qwen2vl
-  max_seq_len: 2048
+  max_seq_len: 4096
   train_size: 80000000
   source_name: sharegpt4v_sft
 
